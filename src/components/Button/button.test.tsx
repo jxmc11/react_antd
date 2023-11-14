@@ -12,8 +12,8 @@ describe("test button component", () => {
     const wrapper = render(<Button>nice</Button>);
     const element = wrapper.getByText("nice");
     expect(element).toBeInTheDocument();
-    expect(element.tagName).toEqual("BUTTON")
-    expect(element).toHaveClass('btn btn-default')
+    expect(element.tagName).toEqual("BUTTON");
+    expect(element).toHaveClass("btn btn-default");
   });
   it("渲染不同的参数button", () => {});
   it("渲染link", () => {});
