@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useRef, useState } from "react";
 
 import Button from "./components/Button/button";
 import SubMenu from "./components/Menu/subMenu";
@@ -11,6 +11,15 @@ import Icon from "./components/Icon/icon";
 
 const App = () => {
   const [show, setShow] = useState(false);
+  const divRef = useRef<HTMLDivElement>(null);
+  const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault()
+    console.log(e.dataTransfer.files);
+  };
+  const handledropover = (e: React.DragEvent<HTMLDivElement>, flag: boolean) => {
+    e.preventDefault()
+    divRef.current!.style.backgroundColor = flag ? "blue" : "white";
+  };
   return (
     <>
       <Icon icon={faCoffee} size="10x" theme="primary" />
@@ -74,6 +83,20 @@ const App = () => {
           1231231231313123123123
         </Button>
       </Transition>
+
+      <div
+        style={{
+          width: "100vw",
+          height: "200px",
+          background: "red",
+        }}
+        ref={divRef}
+        onDragOver={(e) => handledropover(e, true)}
+        onDragLeave={(e) => handledropover(e, false)}
+        onDrop={handleDrop}
+      >
+        111111111
+      </div>
     </>
   );
 };
