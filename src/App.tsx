@@ -8,6 +8,7 @@ import Transition from "./components/Transition/transition";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCoffee } from "@fortawesome/free-solid-svg-icons";
 import Icon from "./components/Icon/icon";
+import Form from "./components/Form/form";
 
 const App = () => {
   const [show, setShow] = useState(false);
@@ -22,7 +23,8 @@ const App = () => {
   };
   return (
     <>
-      <Icon icon={faCoffee} size="10x" theme="primary" />
+      <Form/>
+      {/* <Icon icon={faCoffee} size="10x" theme="primary" />
       <FontAwesomeIcon icon={faCoffee} fontSize={50} />
       <Menu
         style={{
@@ -96,7 +98,7 @@ const App = () => {
         onDrop={handleDrop}
       >
         111111111
-      </div>
+      </div> */}
     </>
   );
 };
