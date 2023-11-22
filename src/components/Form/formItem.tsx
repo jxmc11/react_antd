@@ -2,6 +2,7 @@ import classNames from "classnames";
 import { useContext, useEffect } from "react";
 import { FormContext } from "./form";
 import React from "react";
+import { CustomRule } from "./useStore";
 
 export interface FormItemProps {
   name: string;
@@ -9,16 +10,31 @@ export interface FormItemProps {
   children?: React.ReactNode;
   valuePropName?: string;
   trigger?: string;
+  rules?: CustomRule[];
+  validateTrigger?: string;
   getValueFromEvent?: (event: any) => any;
 }
 
 export type SomeRequired<T, K extends keyof T> = Required<Pick<T, K>> &
   Omit<T, K>;
 
-const FormItem: React.FC<
-  SomeRequired<FormItemProps, "getValueFromEvent" | "trigger" | "valuePropName">
-> = ({ name, label, children, valuePropName, trigger, getValueFromEvent }) => {
-  const { dispatch, fields, initialValues } = useContext(FormContext);
+const FormItem: React.FC<FormItemProps> = (props) => {
+  const {
+    name,
+    label,
+    children,
+    valuePropName,
+    trigger,
+    rules,
+    validateTrigger,
+    getValueFromEvent,
+  } = props as SomeRequired<
+    FormItemProps,
+    "getValueFromEvent" | "trigger" | "valuePropName" | "validateTrigger"
+  >;
+  const { dispatch, fields, initialValues, validateField } =
+    useContext(FormContext);
+
   useEffect(() => {
     const value = (initialValues && initialValues[name]) || "";
     dispatch({
@@ -28,6 +44,9 @@ const FormItem: React.FC<
         label,
         name,
         value,
+        rules: rules || [],
+        errors: [],
+        isValid: true,
       },
     });
   }, []);
@@ -37,6 +56,18 @@ const FormItem: React.FC<
   });
   const fieldState = fields[name];
   const value = fieldState && fieldState.value;
+  const errors = fieldState && fieldState.errors;
+  const isRequired = rules?.some(
+    (rule) => typeof rule !== "function" && rule.required
+  );
+  const hasError = errors && errors.length > 0;
+  const labelCalss = classNames({
+    "viking-form-item-required": isRequired,
+  });
+
+  const itemClass = classNames("viking-form-item-control", {
+    "viking-form-item-has-error": hasError,
+  });
 
   const onValueUpdate = (e: any) => {
     const value = getValueFromEvent(e);
@@ -46,9 +77,18 @@ const FormItem: React.FC<
       value,
     });
   };
+
+  const onValueValidate = async () => {
+    await validateField(name);
+  };
+
   const controlProps: Record<string, any> = {};
   controlProps[valuePropName] = value;
   controlProps[trigger] = onValueUpdate;
+
+  if (rules) {
+    controlProps[validateTrigger] = onValueValidate;
+  }
 
   const childList = React.Children.toArray(children);
   if (childList.length === 0) {
@@ -72,10 +112,19 @@ const FormItem: React.FC<
     <div className={rowClass}>
       {label && (
         <div className="viking-form-item-label">
-          <label title={label}>{label}</label>
+          <label title={label} className={labelCalss}>
+            {label}
+          </label>
         </div>
       )}
-      <div className="viking-form-item">{returnChildNode}</div>
+      <div className="viking-form-item">
+        <div className={itemClass}> {returnChildNode}</div>
+        {hasError && (
+          <div className="viking-form-item-explain">
+            <span>{errors[0].message}</span>
+          </div>
+        )}
+      </div>
     </div>
   );
 };
@@ -84,6 +133,7 @@ FormItem.defaultProps = {
   valuePropName: "value",
   trigger: "onChange",
   getValueFromEvent: (e) => e.target.value,
+  validateTrigger: "onBlur",
 };
 
 export default FormItem;
